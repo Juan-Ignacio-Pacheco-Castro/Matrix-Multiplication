@@ -1,3 +1,7 @@
+*.pro
+*.pro.user
+main
+
 # Prerequisites
 *.d
 
