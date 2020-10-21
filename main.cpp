@@ -1,16 +1,16 @@
-
+#include <exception>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 
 static const unsigned int testCase = 0;
 
-extern "C" void quickMatrixMul(float* matrixNM, float* matrixMP, float* matrixNP, unsigned n, unsigned m, unsigned p);
+//extern "C" void quickMatrixMul(float* matrixNM, float* matrixMP, float* matrixNP, unsigned n, unsigned m, unsigned p);
 
 float* loadMatrix(const char* filename, unsigned int &rows, unsigned int &cols){
     std::ifstream input(filename);
     if(!input)
-        return nullptr;
+        throw 1;
 
     input >> rows;
     input.ignore();
@@ -19,7 +19,7 @@ float* loadMatrix(const char* filename, unsigned int &rows, unsigned int &cols){
 
     float* matrix = new float[rows*cols];
     if(!matrix)
-        return nullptr;
+        throw 2;
 
     for(size_t row = 0; row < rows; ++row){
         for(size_t column = 0; column < cols; ++column){
@@ -50,17 +50,18 @@ void printMatrix(float* matrix, unsigned const int rows, unsigned const int cols
     }
 }
 
-int main(void)
+int main()
 {
     char buffer[64];
     // A matrix
     unsigned int m1Rows = 0;
     unsigned int m1Columns = 0;
     sprintf(buffer, "Casos_prueba/case%u_matrix%u.txt", testCase, 1);
+    float* m1;
     try {
-		float* m1 = loadMatrix(buffer, m1Rows, m1Columns);
-	} catch {
-		std::cerr << "error: not enough memory or incorrect filename" << error.what() << std::endl;
+		m1 = loadMatrix(buffer, m1Rows, m1Columns);
+	} catch (int error) {
+		std::cerr << "error: could not open filename or not enough memory" << std::endl;
 		return 0;
 	}
 
@@ -71,10 +72,11 @@ int main(void)
     unsigned int m2Rows = 0;
     unsigned int m2Columns = 0;
     sprintf(buffer, "Casos_prueba/case%u_matrix%u.txt", testCase, 2);
+    float* m2;
     try {
-		float* m2 = loadMatrix(buffer, m2Rows, m2Columns);
-	} catch {
-		std::cerr << "error: not enough memory or incorrect filename" << error.what() << std::endl;
+		m2 = loadMatrix(buffer, m2Rows, m2Columns);
+	} catch (int error) {
+		std::cerr << "error: not enough memory or incorrect filename" << std::endl;
 		delete [] m1;
 		return 0;
 	}
@@ -82,14 +84,15 @@ int main(void)
     // C matrix result of A x B
     unsigned int elements = m1Rows * m2Columns;
     float* myResult = new float[elements]();
-    quickMatrixMul(m1, m2, myResult, m1Rows, m1Columns, m2Columns); // N, M, P
+    //quickMatrixMul(m1, m2, myResult, m1Rows, m1Columns, m2Columns); // N, M, P
 
     // Output matrix to be compared to
     sprintf(buffer, "Casos_prueba/case%u_output.txt", testCase);
+    float* output;
     try {
-		float* output = loadMatrix(buffer, m1Rows, m2Columns);
-	} catch {
-		std::cerr << "error: not enough memory or incorrect filename" << error.what() << std::endl;
+		output = loadMatrix(buffer, m1Rows, m2Columns);
+	} catch (int error) {
+		std::cerr << "error: not enough memory or incorrect filename" << std::endl;
 		delete [] m1;
 		delete [] m2;
 		return 0;
