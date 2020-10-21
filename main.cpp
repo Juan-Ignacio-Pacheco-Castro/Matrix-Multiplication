@@ -57,7 +57,12 @@ int main(void)
     unsigned int m1Rows = 0;
     unsigned int m1Columns = 0;
     sprintf(buffer, "Casos_prueba/case%u_matrix%u.txt", testCase, 1);
-    float* m1 = loadMatrix(buffer, m1Rows, m1Columns);
+    try {
+		float* m1 = loadMatrix(buffer, m1Rows, m1Columns);
+	} catch {
+		std::cerr << "error: not enough memory or incorrect filename" << error.what() << std::endl;
+		return 0;
+	}
 
    // printMatrix(m1, m1Rows, m1Columns);
 
@@ -66,7 +71,13 @@ int main(void)
     unsigned int m2Rows = 0;
     unsigned int m2Columns = 0;
     sprintf(buffer, "Casos_prueba/case%u_matrix%u.txt", testCase, 2);
-    float* m2 = loadMatrix(buffer, m2Rows, m2Columns);
+    try {
+		float* m2 = loadMatrix(buffer, m2Rows, m2Columns);
+	} catch {
+		std::cerr << "error: not enough memory or incorrect filename" << error.what() << std::endl;
+		delete [] m1;
+		return 0;
+	}
 
     // C matrix result of A x B
     unsigned int elements = m1Rows * m2Columns;
@@ -75,13 +86,21 @@ int main(void)
 
     // Output matrix to be compared to
     sprintf(buffer, "Casos_prueba/case%u_output.txt", testCase);
-    float* output = loadMatrix(buffer, m1Rows, m2Columns);
+    try {
+		float* output = loadMatrix(buffer, m1Rows, m2Columns);
+	} catch {
+		std::cerr << "error: not enough memory or incorrect filename" << error.what() << std::endl;
+		delete [] m1;
+		delete [] m2;
+		return 0;
+	}
 
     if(compare(myResult, output, elements))
         std::cout << "¡SON IGUALES\n!";
     else
         std::cout << "¡NO SON IGUALES. ALERTA\n!";
 
+	delete [] m1;
     delete [] m2;
     delete [] myResult;
     delete [] output;
