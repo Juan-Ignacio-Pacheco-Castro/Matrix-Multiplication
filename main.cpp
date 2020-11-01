@@ -3,7 +3,9 @@
 #include <iomanip>
 #include <iostream>
 
-static const unsigned int testCase = 2;
+static const unsigned int testCase = 1;
+
+void printMatrix(float* matrix, unsigned const int rows, unsigned const int cols);
 
 /**
 %rdi = matrixNM
@@ -18,12 +20,20 @@ static const unsigned int testCase = 2;
 void quickMatrixMul(float* matrixNM, float* matrixMP, float* matrixNP, unsigned n, unsigned m, unsigned p){
 	int i, j, k;
 	float r = 0;
-	// m veces porque es fila por columna hacia una casilla de k
 	for (k = 0; k < m; ++k) {
+		std::cout << "Iteracion k = " << k << std::endl << std::endl;
 		for (i = 0; i < n; ++i) {
+			// Para cada elemento fijo (i, k) en la matriz matrixNM 
 			r = matrixNM[i*m + k];
-			for (j = 0; j < p; ++j)
+			std::cout << "r = Matrix NM[" << i << "][" << k << "] = " << r << std::endl;
+			for (j = 0; j < p; ++j){
 				matrixNP[i*p + j] += r * matrixMP[k*p + j];
+				//std::cout << "Matrix MP[" << k << "][" << j << "] = " << matrixMP[k*p + j] << std::endl;
+				std::cout << "Matrix NP[" << i << "][" << j << "] = " << r << "*" << matrixMP[k*p + j] << std::endl;
+			}
+			std::cout << "\nResult:\n";
+			printMatrix(matrixNP, n, p);
+			std::cout << "\n\n";
 		}
 	} 
 }
@@ -87,8 +97,9 @@ int main()
 		return 0;
 	}
 
-   // printMatrix(m1, m1Rows, m1Columns);
-
+	std::cout << "MATRIZ 1 NM:" << std::endl;
+    printMatrix(m1, m1Rows, m1Columns);
+	
 #if 1
     // B matrix
     unsigned int m2Rows = 0;
@@ -102,11 +113,17 @@ int main()
 		delete [] m1;
 		return 0;
 	}
+	
+	std::cout << "\nMATRIZ 2 MP:" << std::endl;
+	printMatrix(m2, m2Rows, m2Columns);
 
     // C matrix result of A x B
     unsigned int elements = m1Rows * m2Columns;
     float* myResult = new float[elements]();
-    //quickMatrixMul(m1, m2, myResult, m1Rows, m1Columns, m2Columns); // N, M, P
+    quickMatrixMul(m1, m2, myResult, m1Rows, m1Columns, m2Columns); // N, M, P
+    
+    std::cout << "\nMATRIZ RESULTADO NP:" << std::endl;
+    printMatrix(myResult, m1Rows, m2Columns);
 
     // Output matrix to be compared to
     sprintf(buffer, "Casos_prueba/case%u_output.txt", testCase);
@@ -130,7 +147,6 @@ int main()
     delete [] myResult;
     delete [] output;
 #endif
-    delete [] m1;
 
     return 0;
 }
