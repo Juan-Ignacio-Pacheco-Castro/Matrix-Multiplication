@@ -3,9 +3,31 @@
 #include <iomanip>
 #include <iostream>
 
-static const unsigned int testCase = 0;
+static const unsigned int testCase = 2;
 
-extern "C" void quickMatrixMul(float* matrixNM, float* matrixMP, float* matrixNP, unsigned n, unsigned m, unsigned p);
+/**
+%rdi = matrixNM
+%rsi = matrixMP
+%rdx = matrixNP
+%rcx = n
+%r8 = m
+%r9 = p
+*/
+//extern "C" void quickMatrixMul(float* matrixNM, float* matrixMP, float* matrixNP, unsigned n, unsigned m, unsigned p);
+// m1Rows, m1Columns, m2Columns			
+void quickMatrixMul(float* matrixNM, float* matrixMP, float* matrixNP, unsigned n, unsigned m, unsigned p){
+	int i, j, k;
+	float r = 0;
+	// m veces porque es fila por columna hacia una casilla de k
+	for (k = 0; k < m; ++k) {
+		for (i = 0; i < n; ++i) {
+			r = matrixNM[i*m + k];
+			for (j = 0; j < p; ++j)
+				matrixNP[i*p + j] += r * matrixMP[k*p + j];
+		}
+	} 
+}
+//C[i*N+j] += A[i*N+k]*B[k*N+j];
 
 float* loadMatrix(const char* filename, unsigned int &rows, unsigned int &cols){
     std::ifstream input(filename);
@@ -78,7 +100,7 @@ int main(void)
     float* output = loadMatrix(buffer, m1Rows, m2Columns);
 
     if(compare(myResult, output, elements))
-        std::cout << "¡SON IGUALES\n!";
+        std::cout << "¡SON IGUALES!\n";
     else
         std::cout << "¡NO SON IGUALES. ALERTA\n!";
 
