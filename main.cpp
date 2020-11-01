@@ -20,12 +20,16 @@ void printMatrix(float* matrix, unsigned const int rows, unsigned const int cols
 void quickMatrixMul(float* matrixNM, float* matrixMP, float* matrixNP, unsigned n, unsigned m, unsigned p){
 	int i, j, k;
 	float r = 0;
+        //k representa la suma (que es la multiplicacion de las dos celdas respectivas de las matrices operando) que se va agregando a cada celda en la matriz resultante
+        //k = 0 es la primera suma de cada celda resultante. k = 1 es la segunda suma de cada celda resultante, ...
 	for (k = 0; k < m; ++k) {
 		std::cout << "Iteracion k = " << k << std::endl << std::endl;
+                //i representa la fila de la primera matriz
 		for (i = 0; i < n; ++i) {
 			// Para cada elemento fijo (i, k) en la matriz matrixNM 
 			r = matrixNM[i*m + k];
 			std::cout << "r = Matrix NM[" << i << "][" << k << "] = " << r << std::endl;
+                        //j representa la columna de la segunda matriz
 			for (j = 0; j < p; ++j){
 				matrixNP[i*p + j] += r * matrixMP[k*p + j];
 				//std::cout << "Matrix MP[" << k << "][" << j << "] = " << matrixMP[k*p + j] << std::endl;
