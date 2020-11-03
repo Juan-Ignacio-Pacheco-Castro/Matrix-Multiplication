@@ -4,7 +4,6 @@
 .section .text                  # inicia la seccion de codigo
     .globl quickMatrixMul       # declara quickMatrixMul como nombre global
 quickMatrixMul:
-/*
         subq $32, %rsp       		# Restele 32 bytes al rsp, espacio para i, j, k
                                         # 0x8(%rsp) = i
                                         # 0xC(%rsp) = j
@@ -23,12 +22,12 @@ L2:					# Segundo for (i)
         imull %r8d, %eax		# %eax == i *= m
         movl 0x10(%rsp), %r10d		# %r10 = k
         addl %r10d, %eax		# %eax == i*m + k
-        # movl %eax, %eax
         leaq (,%rax,4), %r10		# %r10 = (i*m + k) * sizeof(float)
         movq %rdi, %r11			# %r11 = matrixNM
         addq %r10, %r11			# %r11 += (i*m + k) * sizeof(float)
         pxor %xmm0, %xmm0
         movss (%r11), %xmm0		# %xmm0 = r = matrixNM[i*m + k]
+        shufps $0, %xmm0, %xmm0         # %xmm0 = |r|r|r|r|
         movl $0, 0xC(%rsp)		# j = 0
 
 L3:					# Tercer for (j)
@@ -43,24 +42,24 @@ L3:					# Tercer for (j)
         movq %rsi, %r11			# %r11 = matrixMP
         addq %r10, %r11			# %r11 += (k*p + j) * sizeof(float)
         pxor %xmm2, %xmm2
-        movss (%r11), %xmm2		# %xmm2 = matrixMP[k*p + j], accede al float
-        mulss %xmm0, %xmm2		# %xmm2 = r * matrixMP[k*p + j]
+        movaps (%r11), %xmm2		# %xmm2 = |matrixMP[k*p + j]|=+1|=+2|=+3|
+        mulps %xmm0, %xmm2		# %xmm2 = 4r * 4matrixMP[k*p + j]...
 	
+# i*p + j
+# matrixNP[i*p + j]
         movl 0x8(%rsp), %eax		# %rax = i
         imull %r9d, %eax		# %rax == i *= p
         movl 0xC(%rsp), %r10d		# %r10 = j
         addl %r10d, %eax		# %eax == i*p + j
-        # movl %eax, %eax
 	leaq (,%rax,4), %rax		# %rax = %rax * sizeof(float)
         movq %rdx, %r11			# %r11 = matrixNP
         addq %rax, %r11			# %r11 += (i*p + j) * sizeof(float)
 
         pxor %xmm1, %xmm1
-        movss (%r11), %xmm1		# %xmm1 = matrixNP[i*p + j], accede al float
-
-        addss %xmm1, %xmm2		# %xmm2 = matrixNP[i*p + j] + r * matrixMP[k*p + j];
-        movss %xmm2, (%r11)		# matrixNP[i*p + j] = %xmm2
-        addl $1, 0xC(%rsp)		# ++j
+        movaps (%r11), %xmm1		# %xmm1 = matrixNP[i*p + j], accede al float
+        addps %xmm1, %xmm2		# %xmm2 = matrixNP[i*p + j] + r * matrixMP[k*p + j];
+        movaps %xmm2, (%r11)		# matrixNP[i*p + j] = %xmm2
+        addl $4, 0xC(%rsp)		# j += 4
         jmp L3				# termina iteracion j
 L4:
         addl $1, 0x8(%rsp)		# ++i
@@ -71,8 +70,11 @@ L5:
 end:
         addq $32, %rsp                  # Restura la pila
 	ret
-*/
 
+
+
+
+/*
 movaps (%rsi), %xmm1        # xmm1 = |4.0|2.0|2.0|3.0|
 #    mulps %xmm1, %xmm0
 #   movlhps %xmm2, %xmm2
@@ -82,7 +84,7 @@ shufps $0, %xmm0, %xmm0     # xmm0 = |1.00|1.00|1.00|1.00|
 mulps %xmm1, %xmm0          #      = |1.00  * 4.00|
 movaps %xmm0, (%rdx)
 # movaps %xmm1, (%rdx)
-
+*/
 /*
 # --------------------------
 

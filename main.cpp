@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <iostream>
 
-static const unsigned int testCase = 1;
+static const unsigned int testCase = 2;
 
 void printMatrix(float* matrix, unsigned const int rows, unsigned const int cols);
 extern "C" void quickMatrixMul(float* matrixNM, float* matrixMP, float* matrixNP, unsigned n, unsigned m, unsigned p);
@@ -34,6 +34,24 @@ void quickMatrixMulSSE(float* matrixNM, float* matrixMP, float* matrixNP, unsign
 					matrixNP[i*p + j] += r * matrixMP[k*p + j];
 				}
 			}
+        }
+    }
+}
+#endif
+
+#if 0
+void quickMatrixMul(float* matrixNM, float* matrixMP, float* matrixNP, unsigned n, unsigned m, unsigned p){
+    unsigned int i, j, k;
+    float r = 0;
+    for (k = 0; k < m; ++k) {               // L1
+        for (i = 0; i < n; ++i) {           // L2
+            r = matrixNM[i*m + k];
+            for (j = 0; j < p; j += 4){         // L3
+                matrixNP[i*p + j] += r * matrixMP[k*p + j];
+                matrixNP[i*p + j+1] += r * matrixMP[k*p + j+1];
+                matrixNP[i*p + j+2] += r * matrixMP[k*p + j+2];
+                matrixNP[i*p + j+3] += r * matrixMP[k*p + j+3];
+            }
         }
     }
 }
@@ -153,7 +171,6 @@ int main()
 	std::cout << "MATRIZ 1 NM:" << std::endl;
     printMatrix(m1, m1Rows, m1Columns);
 	
-#if 1
     // B matrix
     unsigned int m2Rows = 0;
     unsigned int m2Columns = 0;
@@ -178,8 +195,6 @@ int main()
     std::cout << "\nMATRIZ RESULTADO NP:" << std::endl;
     printMatrix(myResult, m1Rows, m2Columns);
 
-
-    /*
     // Output matrix to be compared to
     sprintf(buffer, "Casos_prueba/case%u_output.txt", testCase);
     float* output;
@@ -191,18 +206,16 @@ int main()
 		delete [] m2;
 		return 0;
 	}
-    */
-    /*
+
     if(compare(myResult, output, elements))
         std::cout << "¡SON IGUALES!\n";
     else
         std::cout << "¡NO SON IGUALES. ALERTA\n!";
-    */
+
 	delete [] m1;
     delete [] m2;
     delete [] myResult;
-    //delete [] output;
-#endif
+    delete [] output;
 
     return 0;
 }
