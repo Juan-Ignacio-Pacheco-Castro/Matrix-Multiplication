@@ -1,3 +1,4 @@
+
 #include <exception>
 #include <fstream>
 #include <iomanip>
@@ -6,6 +7,7 @@
 static const unsigned int testCase = 1;
 
 void printMatrix(float* matrix, unsigned const int rows, unsigned const int cols);
+extern "C" void quickMatrixMul(float* matrixNM, float* matrixMP, float* matrixNP, unsigned n, unsigned m, unsigned p);
 
 /**
 %rdi = matrixNM
@@ -15,10 +17,55 @@ void printMatrix(float* matrix, unsigned const int rows, unsigned const int cols
 %r8 = m
 %r9 = p
 */
-//extern "C" void quickMatrixMul(float* matrixNM, float* matrixMP, float* matrixNP, unsigned n, unsigned m, unsigned p);
+#if 0
+void quickMatrixMulSSE(float* matrixNM, float* matrixMP, float* matrixNP, unsigned n, unsigned m, unsigned p){
+    unsigned int i, j, k;
+    float r = 0;
+    for (k = 0; k < m; ++k) {                   // L1
+        for (i = 0; i < n; ++i) {               // L2
+            r = matrixNM[i*m + k];
+            for (j = 0; j < p; j += 4)          // L3
+            {
+				if(p - j < 4){
+					for(; j < p; ++j)
+						movss
+				}else{
+					movaps
+					matrixNP[i*p + j] += r * matrixMP[k*p + j];
+				}
+			}
+        }
+    }
+}
+#endif
+
+#if 0
+/**
+%rdi = matrixNM
+%rsi = matrixMP
+%rdx = matrixNP
+%rcx = n
+%r8 = m
+%r9 = p
+*/
+void quickMatrixMul(float* matrixNM, float* matrixMP, float* matrixNP, unsigned n, unsigned m, unsigned p){
+    unsigned int i, j, k;
+    float r = 0;
+    for (k = 0; k < m; ++k) {               // L1
+        for (i = 0; i < n; ++i) {           // L2
+            r = matrixNM[i*m + k];
+            for (j = 0; j < p; ++j)         // L3
+                matrixNP[i*p + j] += r * matrixMP[k*p + j];
+        }
+    }
+}
+#endif
+
+#if 0
+// Testing
 // m1Rows, m1Columns, m2Columns			
 void quickMatrixMul(float* matrixNM, float* matrixMP, float* matrixNP, unsigned n, unsigned m, unsigned p){
-	int i, j, k;
+    unsigned int i, j, k;
 	float r = 0;
         //k representa la suma (que es la multiplicacion de las dos celdas respectivas de las matrices operando) que se va agregando a cada celda en la matriz resultante
         //k = 0 es la primera suma de cada celda resultante. k = 1 es la segunda suma de cada celda resultante, ...
@@ -42,6 +89,8 @@ void quickMatrixMul(float* matrixNM, float* matrixMP, float* matrixNP, unsigned 
 	} 
 }
 //C[i*N+j] += A[i*N+k]*B[k*N+j];
+#endif
+
 
 float* loadMatrix(const char* filename, unsigned int &rows, unsigned int &cols){
     std::ifstream input(filename);
@@ -129,6 +178,8 @@ int main()
     std::cout << "\nMATRIZ RESULTADO NP:" << std::endl;
     printMatrix(myResult, m1Rows, m2Columns);
 
+
+    /*
     // Output matrix to be compared to
     sprintf(buffer, "Casos_prueba/case%u_output.txt", testCase);
     float* output;
@@ -140,16 +191,17 @@ int main()
 		delete [] m2;
 		return 0;
 	}
-
+    */
+    /*
     if(compare(myResult, output, elements))
         std::cout << "¡SON IGUALES!\n";
     else
         std::cout << "¡NO SON IGUALES. ALERTA\n!";
-
+    */
 	delete [] m1;
     delete [] m2;
     delete [] myResult;
-    delete [] output;
+    //delete [] output;
 #endif
 
     return 0;
