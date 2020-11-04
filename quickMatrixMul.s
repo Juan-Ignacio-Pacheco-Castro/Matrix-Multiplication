@@ -36,12 +36,11 @@ L3:					# Tercer for (j)
 
         movl %r9d,%r10d                 # r10d = p
         subl 0xC(%rsp),%r10d            # r10d = p - j
-        cmpl $4,%r10d                   # r10d - 4
-        jnb L6                          # p - j < 4 ?
+        testl $0xFFFFFFFC,%r10d        # r10d - 4; r10d && testl 0xFFFFFFFFC
+        # jna L6                          # p - j < 4 ? L6 : L7     Jump if not above
+        je L6
 
-        #before if: is correct
-        #if: j < p
-L7:
+L7:                                     # Seccion secuencial de SSE. Se usa suffix ss
         cmpl %r9d, 0xC(%rsp)		# j - p
         jnb L4                          # j < p ? Si no, brinque
         movl 0x10(%rsp), %eax		# %eax = k
@@ -73,7 +72,7 @@ L7:
         jmp L7				# termina iteracion j de 1
 
 
-L6:
+L6:                                     # Seccion paralela de SSE. Se usa suffix ps
         movl 0x10(%rsp), %eax		# %eax = k
         imull %r9d, %eax		# %eax == k *= p
         movl 0xC(%rsp), %r10d		# %r10 = j
