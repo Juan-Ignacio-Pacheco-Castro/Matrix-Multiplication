@@ -32,8 +32,48 @@ L2:					# Segundo for (i)
 
 L3:					# Tercer for (j)
         cmpl %r9d, 0xC(%rsp)		# j - p
-        jnb L4	                # j < p ? Si no, brinque
+        jnb L4                          # j < p ? Si no, brinque
 
+        movl %r9d,%r10d                 # r10d = p
+        subl 0xC(%rsp),%r10d            # r10d = p - j
+        cmpl $4,%r10d                   # r10d - 4
+        jnb L6                          # p - j < 4 ?
+
+        #before if: is correct
+        #if: j < p
+L7:
+        cmpl %r9d, 0xC(%rsp)		# j - p
+        jnb L4                          # j < p ? Si no, brinque
+        movl 0x10(%rsp), %eax		# %eax = k
+        imull %r9d, %eax		# %eax == k *= p
+        movl 0xC(%rsp), %r10d		# %r10 = j
+        addl %r10d, %eax		# %eax == k*p + j
+        leaq (,%rax,4), %r10		# %rax = %rax * sizeof(float)
+        movq %rsi, %r11			# %r11 = matrixMP
+        addq %r10, %r11			# %r11 += (k*p + j) * sizeof(float)
+        pxor %xmm2, %xmm2
+        movss (%r11), %xmm2		# %xmm2 = matrixMP[k*p + j]
+        mulss %xmm0, %xmm2		# %xmm2 = r * matrixMP[k*p + j]...
+
+# i*p + j
+# matrixNP[i*p + j]
+        movl 0x8(%rsp), %eax		# %rax = i
+        imull %r9d, %eax		# %rax == i *= p
+        movl 0xC(%rsp), %r10d		# %r10 = j
+        addl %r10d, %eax		# %eax == i*p + j
+        leaq (,%rax,4), %rax		# %rax = %rax * sizeof(float)
+        movq %rdx, %r11			# %r11 = matrixNP
+        addq %rax, %r11			# %r11 += (i*p + j) * sizeof(float)
+
+        pxor %xmm1, %xmm1
+        movss (%r11), %xmm1		# %xmm1 = matrixNP[i*p + j], accede al float
+        addss %xmm1, %xmm2		# %xmm2 = matrixNP[i*p + j] + r * matrixMP[k*p + j];
+        movss %xmm2, (%r11)		# matrixNP[i*p + j] = %xmm2
+        addl $1, 0xC(%rsp)		# j += 1
+        jmp L7				# termina iteracion j de 1
+
+
+L6:
         movl 0x10(%rsp), %eax		# %eax = k
         imull %r9d, %eax		# %eax == k *= p
         movl 0xC(%rsp), %r10d		# %r10 = j
