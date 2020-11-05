@@ -36,9 +36,10 @@ L3:					# Tercer for (j)
 
         movl %r9d,%r10d                 # r10d = p
         subl 0xC(%rsp),%r10d            # r10d = p - j
-        testl $0xFFFFFFFC,%r10d        # r10d - 4; r10d && testl 0xFFFFFFFFC
-        # jna L6                          # p - j < 4 ? L6 : L7     Jump if not above
-        je L6
+        #testl $0xFFFFFFFC,%r10d         # r10d && 0xFFFFFFFFC
+        cmpl $4,%r10d
+        jge L6                        # p - j < 4 ? L6 : L7     Jump if not above
+        #je L6
 
 L7:                                     # Seccion secuencial de SSE. Se usa suffix ss
         cmpl %r9d, 0xC(%rsp)		# j - p
