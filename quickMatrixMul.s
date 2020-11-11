@@ -110,34 +110,3 @@ L5:
 end:
         addq $32, %rsp                  # Restura la pila
 	ret
-
-
-
-
-/*
-movaps (%rsi), %xmm1        # xmm1 = |4.0|2.0|2.0|3.0|
-#    mulps %xmm1, %xmm0
-#   movlhps %xmm2, %xmm2
-
-movss (%rdi), %xmm0         # xmm0 = |0|0|0|1.00|
-shufps $0, %xmm0, %xmm0     # xmm0 = |1.00|1.00|1.00|1.00|
-mulps %xmm1, %xmm0          #      = |1.00  * 4.00|
-movaps %xmm0, (%rdx)
-# movaps %xmm1, (%rdx)
-*/
-/*
-# --------------------------
-
-leaq 0x4(%rsi), %rax
-movaps (%rax), %xmm1
-movss (%rdi), %xmm0
-shufps $0, %xmm0, %xmm0
-mulps %xmm1, %xmm0
-
-leaq 0x4(%rdx), %rax
-movaps %xmm0, (%rax)
-*/
-
-
-
-
