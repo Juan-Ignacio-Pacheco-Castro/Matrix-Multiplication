@@ -41,6 +41,77 @@ void quickMatrixMulSSE(float* matrixNM, float* matrixMP, float* matrixNP, unsign
 }
 #endif
 
+#if 0
+void quickMatrixMul(float* matrixNM, float* matrixMP, float* matrixNP, unsigned n, unsigned m, unsigned p){
+    unsigned int i, j, k;
+    float r = 0;
+    for (k = 0; k < m; ++k) {               // L1
+        for (i = 0; i < n; ++i) {           // L2
+            r = matrixNM[i*m + k];
+            for (j = 0; j < p; j += 4){         // L3
+                matrixNP[i*p + j] += r * matrixMP[k*p + j];
+                matrixNP[i*p + j+1] += r * matrixMP[k*p + j+1];
+                matrixNP[i*p + j+2] += r * matrixMP[k*p + j+2];
+                matrixNP[i*p + j+3] += r * matrixMP[k*p + j+3];
+            }
+        }
+    }
+}
+#endif
+
+#if 0
+/**
+%rdi = matrixNM
+%rsi = matrixMP
+%rdx = matrixNP
+%rcx = n
+%r8 = m
+%r9 = p
+*/
+void quickMatrixMul(float* matrixNM, float* matrixMP, float* matrixNP, unsigned n, unsigned m, unsigned p){
+    unsigned int i, j, k;
+    float r = 0;
+    for (k = 0; k < m; ++k) {               // L1
+        for (i = 0; i < n; ++i) {           // L2
+            r = matrixNM[i*m + k];
+            for (j = 0; j < p; ++j)         // L3
+                matrixNP[i*p + j] += r * matrixMP[k*p + j];
+        }
+    }
+}
+#endif
+
+#if 0
+// Testing
+// m1Rows, m1Columns, m2Columns			
+void quickMatrixMul(float* matrixNM, float* matrixMP, float* matrixNP, unsigned n, unsigned m, unsigned p){
+    unsigned int i, j, k;
+	float r = 0;
+        //k representa la suma (que es la multiplicacion de las dos celdas respectivas de las matrices operando) que se va agregando a cada celda en la matriz resultante
+        //k = 0 es la primera suma de cada celda resultante. k = 1 es la segunda suma de cada celda resultante, ...
+	for (k = 0; k < m; ++k) {
+		std::cout << "Iteracion k = " << k << std::endl << std::endl;
+                //i representa la fila de la primera matriz
+		for (i = 0; i < n; ++i) {
+			// Para cada elemento fijo (i, k) en la matriz matrixNM 
+			r = matrixNM[i*m + k];
+			std::cout << "r = Matrix NM[" << i << "][" << k << "] = " << r << std::endl;
+                        //j representa la columna de la segunda matriz
+			for (j = 0; j < p; ++j){
+				matrixNP[i*p + j] += r * matrixMP[k*p + j];
+				//std::cout << "Matrix MP[" << k << "][" << j << "] = " << matrixMP[k*p + j] << std::endl;
+				std::cout << "Matrix NP[" << i << "][" << j << "] = " << r << "*" << matrixMP[k*p + j] << std::endl;
+			}
+			std::cout << "\nResult:\n";
+			printMatrix(matrixNP, n, p);
+			std::cout << "\n\n";
+		}
+	} 
+}
+//C[i*N+j] += A[i*N+k]*B[k*N+j];
+#endif
+
+
 float* loadMatrix(const char* filename, unsigned int &rows, unsigned int &cols){
     std::ifstream input(filename);
     if(!input)

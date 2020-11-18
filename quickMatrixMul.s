@@ -1,6 +1,7 @@
 
 # %r10 y %r11 son calleer saved
 
+
 .section .text                  # inicia la seccion de codigo
     .globl quickMatrixMul       # declara quickMatrixMul como nombre global
 quickMatrixMul:
@@ -31,18 +32,17 @@ L2:					# Segundo for (i)
 L3:					# Tercer for (j)
         cmpl %r9d, 0xC(%rsp)		# j - p
         jnb L4                          # j < p ? Si no, brinque
-
-        movl %r9d, %r10d                 # r10d = p
-        cmpl $4,%r10d
-        jb L7
-        subl 0xC(%rsp), %r10d            # r10d = p - j
-        testl $0xFFFFFFFC,%r10d
-        je L6
-        #cmpl $4, %r10d
-        #jge L6                        # p - j < 4 ? L6 : L7     Jump if not above
+        movl %r9d, %r10d                # r10d = p
+      #  cmpl $4,%r10d
+      #  jb L7
+        subl 0xC(%rsp), %r10d           # r10d = p - j
+       # testl $0xFFFFFFFC,%r10d
+       # je L6
+        cmpl $4, %r10d
+        jge L6                        # p - j < 4 ? L6 : L7     Jump if not above
 L7:                                     # Seccion secuencial de SSE. Se usa suffix ss
-        cmpl %r9d, 0xC(%rsp)		# j - p
-        jnb L4                          # j < p ? Si no, brinque
+        cmpl %r9d, 0xC(%rsp)		# j - p;
+        jnb L4                          # j < p ? Si no, brinque;
         movl 0x10(%rsp), %eax		# %eax = k
         imull %r9d, %eax		# %eax == k *= p
         movl 0xC(%rsp), %r10d		# %r10 = j
@@ -70,8 +70,6 @@ L7:                                     # Seccion secuencial de SSE. Se usa suff
         movss %xmm2, (%r11)		# matrixNP[i*p + j] = %xmm2
         addl $1, 0xC(%rsp)		# j += 1
         jmp L7				# termina iteracion j de 1
-
-
 L6:                                     # Seccion paralela de SSE. Se usa suffix ps
         movl 0x10(%rsp), %eax		# %eax = k
         imull %r9d, %eax		# %eax == k *= p
