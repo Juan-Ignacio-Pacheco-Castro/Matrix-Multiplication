@@ -14,7 +14,6 @@ L1:					# Primer for, ciclo externo (k)
         cmpl %r8d, 0x10(%rsp)		# k - m
         jnb end			# k < m ? Si no, brinque
         movl $0, 0x8(%rsp)		# i = 0
-
 L2:					# Segundo for (i)
         cmpl %ecx, 0x8(%rsp)		# i - n
         jnb L5			# i < n ? Si no, brinque
@@ -29,18 +28,14 @@ L2:					# Segundo for (i)
         movss (%r11), %xmm0		# %xmm0 = r = matrixNM[i*m + k]
         shufps $0, %xmm0, %xmm0         # %xmm0 = |r|r|r|r|
         movl $0, 0xC(%rsp)		# j = 0
-
 L3:					# Tercer for (j)
         cmpl %r9d, 0xC(%rsp)		# j - p
         jnb L4                          # j < p ? Si no, brinque
 
-        movl %r9d,%r10d                 # r10d = p
-        subl 0xC(%rsp),%r10d            # r10d = p - j
-        #testl $0xFFFFFFFC,%r10d         # r10d && 0xFFFFFFFFC
-        cmpl $4,%r10d
+        movl %r9d, %r10d                 # r10d = p
+        subl 0xC(%rsp), %r10d            # r10d = p - j
+        cmpl $4, %r10d
         jge L6                        # p - j < 4 ? L6 : L7     Jump if not above
-        #je L6
-
 L7:                                     # Seccion secuencial de SSE. Se usa suffix ss
         cmpl %r9d, 0xC(%rsp)		# j - p
         jnb L4                          # j < p ? Si no, brinque
